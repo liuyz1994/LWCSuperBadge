@@ -30,7 +30,6 @@ public with sharing class MetadateAPIService {
         allMetadataList.add(trans);
         MetadataService.MetadataPort service = createService();
         List<MetadataService.UpsertResult> results = service.upsertMetadata(allMetadataList);
-        system.debug(results[0]);
         return results[0].success;
     }
 
