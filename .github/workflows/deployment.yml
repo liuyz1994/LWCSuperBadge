@@ -1,0 +1,51 @@
+name: CICD
+
+on:
+  pull_request:
+      types: [opened, synchronize]
+      branches:
+        - development
+        paths:
+            - 'force-app/**'
+
+jobs:
+    validate-branch-name:
+        runs-on: macos-latest
+        steps:
+            - name: Validate branch name requirements
+              uses: deepakputhraya/action-branch-name@master
+              with:
+                  regex: '([a-z])+\/([a-z])+'
+                  min_length: 3
+            # Update sfdx-project.json and README to use only latest package version
+            - name: 'Update sfdx-project.json and README'
+              id: packaging-updater
+              uses: muenzpraeger/github-action-sfdx-packaging-updater@master
+
+            # Re-add changes back to source
+            - name: 'Add new package version, updated sfdx-project.json and README to source'
+              if: steps.packaging-updater.outputs.isSuccess
+              uses: Automattic/action-commit-to-branch@master
+              with:
+                  branch: ${{ github.head_ref }}
+                  commit_message: 'Added new package version ID'
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+            # Install Salesforce CLI
+            - name: Install Salesforce CLI
+              run: |
+                  wget https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz
+                  mkdir sfdx-cli
+                  tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
+                  ./sfdx-cli/install
+             # install SFDX-Git-Delta plugin - https://github.com/scolladon/sfdx-git-delta
+            - name: 'Installing sfdx git delta'
+              run: | 
+                  echo y | sfdx plugins:install sfdx-git-delta
+                  sfdx plugins 
+            #checkout source code
+            - name: 'Checkout source code'
+              uses: actions/checkout@v2
+              with:
+                fetch-depth: 0
+           
