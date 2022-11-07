@@ -5,8 +5,8 @@ on:
       types: [opened, synchronize]
       branches:
         - development
-        paths:
-            - 'force-app/**'
+      paths:
+         - 'force-app/**'
 
 jobs:
     validate-branch-name:
