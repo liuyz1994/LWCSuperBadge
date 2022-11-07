@@ -1,5 +1,5 @@
 public with sharing class BoatDataService {
-
+ 
     public static final String LENGTH_TYPE = 'Length'; 
     public static final String PRICE_TYPE = 'Price'; 
     public static final String TYPE_TYPE = 'Type'; 
