@@ -10,7 +10,7 @@ on:
 
 jobs:
     validate-branch-name:
-        runs-on: macos-latest
+        runs-on: ubuntu-latest
         steps:
             - name: Validate branch name requirements
               uses: deepakputhraya/action-branch-name@master
@@ -48,4 +48,39 @@ jobs:
               uses: actions/checkout@v2
               with:
                 fetch-depth: 0
+            - name: 'Create delta packages for new, modified or deleted metadata'
+              run: | 
+                  mkdir changed-sources
+                  sfdx sgd:source:delta --to "HEAD" --from "HEAD^" --output changed-sources/ --generate-delta --source force-app/
+
+            # Authenticate to org
+            - name: 'Authenticate to Integration Org'
+              shell: bash
+              env:
+                SECRETE: ${{ secrets.SECURITY_TOKEN }}
+              run: sfdx auth:sfdxurl:store -f $SECRETE -s -a integration
+
+            # We use SFDX Git Delta to create a directory with only the metadata that has changed.
+            # this allows us to deploy only those changes, as opposed to deploying the entire branch. 
+            # This helps reducing deployment times
+            - name: 'Create delta packages for new, modified or deleted metadata'
+              run: | 
+                  mkdir changed-sources
+                  sfdx sgd:source:delta --to "HEAD" --from "HEAD^" --output changed-sources/ --generate-delta --source force-app/
+
+            # Now we can use the sfdx scanner to scan the code in the delta directory
+            # The output of the scan is stored in a file called apexScanResults.sarif
+
+            # The .sarif file can later be uploaded to github, so that we can see the 
+            # results of the scan directly from the PR.
+
+            - name: 'Scan code'
+              run: |
+                  cd changed-sources
+                  sfdx scanner:run --format sarif --target './**/*.cls' --category "Design,Best Practices,Performance" --outfile 'apexScanResults.sarif'  
+                  cd ..
+
+            
+                  
+
            
