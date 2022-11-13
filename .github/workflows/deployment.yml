@@ -3,8 +3,7 @@ name: CICD
 on:
   pull_request:
       types: [opened, synchronize]
-      branches:
-        - development
+      branches: [development]
       paths:
          - 'force-app/**'
 
