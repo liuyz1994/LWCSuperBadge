@@ -8,7 +8,7 @@ on:
          - 'force-app/**'
 
 jobs:
-    validate-branch-name:
+    validate-deployment-on-develop-org:
         runs-on: ubuntu-latest
         steps:
             # Now we install nodejs in the VM, and specify version 14
@@ -44,8 +44,7 @@ jobs:
              # install SFDX-Git-Delta plugin - https://github.com/scolladon/sfdx-git-delta
             - name: 'Installing sfdx git delta'
               run: | 
-                  echo y | sfdx plugins:install sfdx-git-delta
-                  sfdx plugins 
+                  npm install sfdx-git-delta@latest -g
             #checkout source code
             - name: 'Checkout source code'
               uses: actions/checkout@v2
