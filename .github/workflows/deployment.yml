@@ -11,25 +11,25 @@ jobs:
     validate-branch-name:
         runs-on: ubuntu-latest
         steps:
-            - name: Validate branch name requirements
-              uses: deepakputhraya/action-branch-name@master
-              with:
-                  regex: '([a-z])+\/([a-z])+'
-                  min_length: 3
+            # - name: Validate branch name requirements
+            #   uses: deepakputhraya/action-branch-name@master
+            #   with:
+            #       regex: '([a-z])+\/([a-z])+'
+            #       min_length: 3
             # Update sfdx-project.json and README to use only latest package version
-            - name: 'Update sfdx-project.json and README'
-              id: packaging-updater
-              uses: muenzpraeger/github-action-sfdx-packaging-updater@master
+            # - name: 'Update sfdx-project.json and README'
+            #   id: packaging-updater
+            #   uses: muenzpraeger/github-action-sfdx-packaging-updater@master
 
             # Re-add changes back to source
-            - name: 'Add new package version, updated sfdx-project.json and README to source'
-              if: steps.packaging-updater.outputs.isSuccess
-              uses: Automattic/action-commit-to-branch@master
-              with:
-                  branch: ${{ github.head_ref }}
-                  commit_message: 'Added new package version ID'
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+            # - name: 'Add new package version, updated sfdx-project.json and README to source'
+            #   if: steps.packaging-updater.outputs.isSuccess
+            #   uses: Automattic/action-commit-to-branch@master
+            #   with:
+            #       branch: ${{ github.head_ref }}
+            #       commit_message: 'Added new package version ID'
+            #   env:
+            #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
             # Install Salesforce CLI
             - name: Install Salesforce CLI
               run: |
