@@ -46,9 +46,15 @@ jobs:
               run: | 
                   npm install sfdx-git-delta@latest -g
             
+            # Install java as it is required for the next step
+            - name: 'Installing java'
+              run: |
+                  sudo apt-get install openjdk-8-jdk
+            
             # Install SFDX scanner
             - name: 'Installing SFDX scanner'
-             run: sfdx plugins:install @salesforce/sfdx-scanner
+             run: |
+                  sfdx plugins:install @salesforce/sfdx-scanner
             
             #checkout source code
             - name: 'Checkout source code'
@@ -71,10 +77,10 @@ jobs:
             # We use SFDX Git Delta to create a directory with only the metadata that has changed.
             # this allows us to deploy only those changes, as opposed to deploying the entire branch. 
             # This helps reducing deployment times
-            - name: 'Generate SFDX Delta Package'
+            - name: 'Generate package.xml'
               run: | 
                   mkdir changed-sources
-                  sfdx sgd:source:delta --to "HEAD" --from "HEAD^" --output changed-sources/ --generate-delta --source force-app/
+                  sfdx sgd:source:delta --to "HEAD" --from "HEAD^" --output changed-sources/ --generate-delta --source force-app/ 
 
             # Now we can use the sfdx scanner to scan the code in the delta directory
             # The output of the scan is stored in a file called apexScanResults.sarif
