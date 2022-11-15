@@ -41,20 +41,20 @@ jobs:
                   mkdir sfdx-cli
                   tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
                   ./sfdx-cli/install
-             # install SFDX-Git-Delta plugin - https://github.com/scolladon/sfdx-git-delta
+            # install SFDX-Git-Delta plugin - https://github.com/scolladon/sfdx-git-delta
             - name: 'Installing sfdx git delta'
               run: | 
                   npm install sfdx-git-delta@latest -g
             
-            # Install java as it is required for the next step
-            - name: 'Installing java'
-              run: |
-                  sudo apt-get install openjdk-8-jdk
+            # # Install java as it is required for the next step
+            # - name: 'Installing java'
+            #   run: |
+            #       sudo apt-get install openjdk-8-jdk
             
-            # Install SFDX scanner
-            - name: 'Installing SFDX scanner'
-             run: |
-                  sfdx plugins:install @salesforce/sfdx-scanner
+            # # Install SFDX scanner
+            # - name: 'Installing SFDX scanner'
+            #  run: |
+            #       sfdx plugins:install @salesforce/sfdx-scanner
             
             #checkout source code
             - name: 'Checkout source code'
