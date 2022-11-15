@@ -50,10 +50,6 @@ jobs:
               uses: actions/checkout@v2
               with:
                 fetch-depth: 0
-            - name: 'Create delta packages for new, modified or deleted metadata'
-              run: | 
-                  mkdir changed-sources
-                  sfdx sgd:source:delta --to "HEAD" --from "HEAD^" --output changed-sources/ --generate-delta --source force-app/
 
             # The URL is stored in the Github Secret named SECURITY_TOKEN
             # so here we store the URL into a text file
@@ -72,8 +68,8 @@ jobs:
             # This helps reducing deployment times
             - name: 'Create delta packages for new, modified or deleted metadata'
               run: | 
-                  mkdir changes
-                  sfdx sgd:source:delta --to "HEAD" --from "HEAD^" --output changes/ --generate-delta --source force-app/
+                  mkdir changed-sources
+                  sfdx sgd:source:delta --to "HEAD" --from "HEAD^" --output changed-sources/ --generate-delta --source force-app/
 
             # Now we can use the sfdx scanner to scan the code in the delta directory
             # The output of the scan is stored in a file called apexScanResults.sarif
@@ -83,15 +79,15 @@ jobs:
 
             - name: 'Scan code'
               run: |
-                  cd changes
+                  cd changed-sources
                   sfdx scanner:run --format sarif --target './**/*.cls' --category "Design,Best Practices,Performance" --outfile 'apexScanResults.sarif'  
                   cd ..
   
             # Now we upload the .sarif file as explained in the previous step
             - name: Upload SARIF file
-              uses: github/codeql-action/upload-sarif@v1
+              uses: github/codeql-action/upload-sarif@v2
               with:
-                sarif_file: changes/apexScanResults.sarif
+                sarif_file: changed-sources/apexScanResults.sarif
 
             
                   
