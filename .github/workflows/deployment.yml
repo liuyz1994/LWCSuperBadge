@@ -45,6 +45,11 @@ jobs:
             - name: 'Installing sfdx git delta'
               run: | 
                   npm install sfdx-git-delta@latest -g
+            
+            # Install SFDX scanner
+            - name: 'Installing SFDX scanner'
+             run: sfdx plugins:install @salesforce/sfdx-scanner
+            
             #checkout source code
             - name: 'Checkout source code'
               uses: actions/checkout@v2
@@ -62,10 +67,6 @@ jobs:
             # Authenticate to org
             - name: 'Authenticate to Integration Org'
               run: sfdx auth:sfdxurl:store -f ./SFDX_INTEGRATION_URL.txt -s -a integration
-
-            # Install SFDX scanner
-            - name: 'Installing SFDX scanner'
-             run: sfdx plugins:install @salesforce/sfdx-scanner
 
             # We use SFDX Git Delta to create a directory with only the metadata that has changed.
             # this allows us to deploy only those changes, as opposed to deploying the entire branch. 
