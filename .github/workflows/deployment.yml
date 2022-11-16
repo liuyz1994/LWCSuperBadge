@@ -12,9 +12,9 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             # Now we install nodejs in the VM, and specify version 14
-            - uses: actions/setup-node@v2
+            - uses: actions/setup-node@v3
               with:
-                node-version: '14'
+                node-version: '16'
             # - name: Validate branch name requirements
             #   uses: deepakputhraya/action-branch-name@master
             #   with:
@@ -59,7 +59,7 @@ jobs:
             
             #checkout source code
             - name: 'Checkout source code'
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                 fetch-depth: 0
 
