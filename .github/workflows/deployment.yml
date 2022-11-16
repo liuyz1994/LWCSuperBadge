@@ -35,16 +35,18 @@ jobs:
             #   env:
             #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
             # Install Salesforce CLI
+            #  wget https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz
+            #       mkdir sfdx-cli
+            #       tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
+            #       ./sfdx-cli/install
             - name: Install Salesforce CLI
               run: |
-                  wget https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz
-                  mkdir sfdx-cli
-                  tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
-                  ./sfdx-cli/install
+                  npm install sfdx-cli --global
+                 
+                  
             # install SFDX-Git-Delta plugin - https://github.com/scolladon/sfdx-git-delta
-                              # npm install sfdx-git-delta@latest -g
             - name: 'Installing sfdx git delta'
-              run:  echo 'y' | sfdx plugins:install -f sfdx-git-delta
+              run:  npm install sfdx-git-delta@latest -g
             
             # Install java as it is required for the next step
             - name: 'Installing java'
@@ -61,7 +63,7 @@ jobs:
             - name: 'Checkout source code'
               uses: actions/checkout@v3
               with:
-                fetch-depth: 0
+                fetch-depth: 2
 
             # The URL is stored in the Github Secret named SECURITY_TOKEN
             # so here we store the URL into a text file
