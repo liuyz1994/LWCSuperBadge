@@ -40,9 +40,7 @@ jobs:
             #       tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
             #       ./sfdx-cli/install
             - name: Install Salesforce CLI
-              run: |
-                  npm install sfdx-cli --global
-                 
+              run: npm install sfdx-cli --global
                   
             # install SFDX-Git-Delta plugin - https://github.com/scolladon/sfdx-git-delta
             - name: 'Installing sfdx git delta'
