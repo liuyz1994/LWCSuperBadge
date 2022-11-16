@@ -44,8 +44,8 @@ jobs:
             # install SFDX-Git-Delta plugin - https://github.com/scolladon/sfdx-git-delta
                               # npm install sfdx-git-delta@latest -g
             - name: 'Installing sfdx git delta'
-              run: | 
-                  echo 'y' | sfdx plugins:install -f sfdx-git-delta
+              run:  echo 'y' | sfdx plugins:install -f sfdx-git-delta
+            
             # Install java as it is required for the next step
             - name: 'Installing java'
               run: |
