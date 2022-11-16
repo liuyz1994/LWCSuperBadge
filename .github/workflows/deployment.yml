@@ -45,7 +45,7 @@ jobs:
                               # npm install sfdx-git-delta@latest -g
             - name: 'Installing sfdx git delta'
               run: | 
-                  sfdx plugins:install sfdx-git-delta
+                  echo 'y' | sfdx plugins:install -f sfdx-git-delta
             # Install java as it is required for the next step
             - name: 'Installing java'
               run: |
