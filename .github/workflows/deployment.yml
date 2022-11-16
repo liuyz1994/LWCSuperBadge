@@ -49,10 +49,10 @@ jobs:
                   sudo apt-get update 
                   sudo apt-get install openjdk-8-jdk
             
-            # # Install SFDX scanner
-            # - name: 'Installing SFDX scanner'
-            #  run: |
-            #       sfdx plugins:install @salesforce/sfdx-scanner
+            # Install SFDX scanner
+            - name: 'Installing SFDX scanner'
+             run: |
+                  sfdx plugins:install @salesforce/sfdx-scanner
             
             #checkout source code
             - name: 'Checkout source code'
