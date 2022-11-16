@@ -51,9 +51,8 @@ jobs:
             
             # Install SFDX scanner
             - name: 'Installing SFDX scanner'
-             run: |
-                  sfdx plugins:install @salesforce/sfdx-scanner
-            
+              run: sfdx plugins:install @salesforce/sfdx-scanner
+
             #checkout source code
             - name: 'Checkout source code'
               uses: actions/checkout@v3
