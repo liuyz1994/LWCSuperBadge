@@ -6,6 +6,10 @@ on:
       branches: [development] 
       paths:
          - 'force-app/**'
+  push:
+      branches: [ development ]
+      paths:
+        - 'force-app/**'
 
 jobs:
     validate-deployment-on-develop-org:
@@ -25,15 +29,15 @@ jobs:
             #   id: packaging-updater
             #   uses: muenzpraeger/github-action-sfdx-packaging-updater@master
 
-            # Re-add changes back to source
-            # - name: 'Add new package version, updated sfdx-project.json and README to source'
-            #   if: steps.packaging-updater.outputs.isSuccess
-            #   uses: Automattic/action-commit-to-branch@master
-            #   with:
-            #       branch: ${{ github.head_ref }}
-            #       commit_message: 'Added new package version ID'
-            #   env:
-            #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+            - name: 'Read PR Comment Body'
+              env:
+                PR_BODY: ${{github.event.pull_request.body}}
+              run: |
+                  echo $PR_BODY > ./pr_body.txt
+                  node ./parsePR.js 
+                  TESTS=$(cat testsToRun.txt)
+                  echo "APEX_TESTS=$TESTS" >> $TESTCLASS
+             
             - name: Install Salesforce CLI
               run: npm install sfdx-cli --global
                   
@@ -77,7 +81,7 @@ jobs:
             - name: 'Generate package.xml'
               run: | 
                   mkdir changed-sources
-                  sfdx sgd:source:delta --to "HEAD" --from "development" --output changed-sources/ --generate-delta --source force-app/ 
+                  sfdx sgd:source:delta --to "HEAD" --from "HEAD~1" --output changed-sources/ --generate-delta --source force-app/ 
 
             # Now we can use the sfdx scanner to scan the code in the delta directory
             # The output of the scan is store d in a file called apexScanResults.sarif
@@ -96,6 +100,19 @@ jobs:
               uses: github/codeql-action/upload-sarif@v2
               with:
                 sarif_file: changed-sources/apexScanResults.sarif
+
+            # run test
+            - name: run specific test
+              if : ${{ env.APEX_TESTS != 'all' }}
+              run: |
+                  echo ${{env.APEX_TESTS}}
+                  sfdx force:source:deploy -p "changed-sources/force-app" --checkonly --testlevel RunSpecifiedTests --runtests ${{env.APEX_TESTS}} --json
+            
+            - name: run default
+              if : ${{ env.APEX_TESTS == 'all' }}
+              run: |
+                  sfdx force:source:deploy -p "changed-sources/force-app" --checkonly --testlevel NoTestRun --json
+
 
             
                   
