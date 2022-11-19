@@ -1,0 +1,120 @@
+name: CICD
+
+on:
+  pull_request:
+      types: [opened, synchronize]
+      branches: [development] 
+      paths:
+         - 'force-app/**'
+  push:
+      branches: [ development ]
+      paths:
+        - 'force-app/**'
+
+jobs:
+    validate-deployment-on-develop-org:
+        runs-on: ubuntu-latest
+        steps:
+            # Now we install nodejs in the VM, and specify version 14
+            - uses: actions/setup-node@v3
+              with:
+                node-version: '16'
+            # - name: Validate branch name requirements
+            #   uses: deepakputhraya/action-branch-name@master
+            #   with:
+            #       regex: '([a-z])+\/([a-z])+'
+            #       min_length: 3
+            # Update sfdx-project.json and README to use only latest package version
+            # - name: 'Update sfdx-project.json and README'
+            #   id: packaging-updater
+            #   uses: muenzpraeger/github-action-sfdx-packaging-updater@master
+
+            - name: 'Read PR Comment Body'
+              env:
+                PR_BODY: ${{github.event.pull_request.body}}
+              run: |
+                  echo $PR_BODY > ./pr_body.txt
+                  node parsePR.js 
+                  TESTS=$(cat testsToRun.txt)
+                  echo "APEX_TESTS=$TESTS" >> $TESTCLASS
+             
+            - name: Install Salesforce CLI
+              run: npm install sfdx-cli --global
+                  
+            # install SFDX-Git-Delta plugin - https://github.com/scolladon/sfdx-git-delta
+            - name: 'Installing sfdx git delta'
+              run:  |
+                    echo y | sfdx plugins:install sfdx-git-delta
+                    sfdx plugins 
+            
+            # Install java as it is required for the next step
+            - name: 'Installing java'
+              run: |
+                  sudo apt-get update 
+                  sudo apt-get install openjdk-8-jdk
+            
+            # Install SFDX scanner
+            - name: 'Installing SFDX scanner'
+              run: sfdx plugins:install @salesforce/sfdx-scanner
+
+            #checkout source code
+            - name: 'Checkout source code'
+              uses: actions/checkout@v3
+              with:
+                fetch-depth: 2
+
+            # The URL is stored in the Github Secret named SECURITY_TOKEN
+            # so here we store the URL into a text file
+            # sfdx does not accept bash variable that's why we store it in a file
+            - name: 'Populate auth file with SFDX_URL secret of integration org'
+              shell: bash
+              run: |
+                  echo ${{ secrets.SECURITY_TOKEN }} > ./SFDX_INTEGRATION_URL.txt
+
+            # Authenticate to org
+            - name: 'Authenticate to Integration Org'
+              run: sfdx auth:sfdxurl:store -f ./SFDX_INTEGRATION_URL.txt -s -a integration
+
+            # We use SFDX Git Delta to create a directory with only the metadata that has changed.
+            # this allows us to deploy only those changes, as opposed to deploying the entire branch. 
+            # This helps reducing deployment times
+            - name: 'Generate package.xml'
+              run: | 
+                  mkdir changed-sources
+                  sfdx sgd:source:delta --to "HEAD" --from "HEAD~1" --output changed-sources/ --generate-delta --source force-app/ 
+
+            # Now we can use the sfdx scanner to scan the code in the delta directory
+            # The output of the scan is store d in a file called apexScanResults.sarif
+
+            # The .sarif file can later be uploaded to github, so that we can see the 
+            # results of the scan directly from the PR.
+
+            - name: 'Scan code'
+              run: |
+                  cd changed-sources
+                  sfdx scanner:run --format sarif --target './**/*.cls' --category "Design,Best Practices,Performance" --outfile 'apexScanResults.sarif'  
+                  cd ..
+  
+            # Now we upload the .sarif file as explained in the previous step
+            - name: Upload SARIF file
+              uses: github/codeql-action/upload-sarif@v2
+              with:
+                sarif_file: changed-sources/apexScanResults.sarif
+
+            # run test
+            - name: run specific test
+              if : ${{ env.APEX_TESTS != 'all' }}
+              run: |
+                  echo ${{env.APEX_TESTS}}
+                  sfdx force:source:deploy -p "changed-sources/force-app" --checkonly --testlevel RunSpecifiedTests --runtests ${{env.APEX_TESTS}} --json
+            
+            - name: run default
+              if : ${{ env.APEX_TESTS == 'all' }}
+              run: |
+                  sfdx force:source:deploy -p "changed-sources/force-app" --checkonly --testlevel NoTestRun --json
+
+
+            
+                  
+
+           
