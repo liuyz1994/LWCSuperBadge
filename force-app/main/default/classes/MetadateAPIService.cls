@@ -55,6 +55,6 @@ public with sharing class MetadateAPIService {
         MetadataService.MetadataPort service = new MetadataService.MetadataPort();
         service.SessionHeader = new MetadataService.SessionHeader_element();
         service.SessionHeader.sessionId = UserInfo.getSessionId();
-        return service;     
+        return service; 
     }
 }
