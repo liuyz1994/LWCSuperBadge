@@ -15,7 +15,8 @@ async function extractTests(){
     for await (const line of lines) {
         //special delimeter for apex tests
         if(line.includes('TestClass:[')){
-            let tests = line.substring(9,line.length-1);
+            let tests = line.substring(11,line.length-1);
+            console.log(tests);
             await fs.promises.writeFile(testsFile,tests);
             await fs.promises.appendFile(testsFile,'\n');
         }
