@@ -6,10 +6,6 @@ on:
       branches: [development] 
       paths:
          - 'force-app/**'
-  push:
-      branches: [ development ]
-      paths:
-        - 'force-app/**'
 
 jobs:
     validate-deployment-on-develop-org:
