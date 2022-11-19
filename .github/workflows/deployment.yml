@@ -24,7 +24,6 @@ jobs:
             # - name: 'Update sfdx-project.json and README'
             #   id: packaging-updater
             #   uses: muenzpraeger/github-action-sfdx-packaging-updater@master
-
             - name: 'Read PR Comment Body'
               env:
                 PR_BODY: ${{github.event.pull_request.body}}
